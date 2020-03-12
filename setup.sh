@@ -1,3 +1,3 @@
 #!/bin/bash
 
-ln -s -f .tmux.conf ~/.tmux.conf
+ln -s -f ~/.dotconfigs/.tmux.conf ~/.tmux.conf
