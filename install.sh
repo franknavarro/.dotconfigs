@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DOTFILES=$(pwd)
+export DOTFILES=$(pwd)
 
 LINUX_PACKAGES=$DOTFILES/packages.txt
 sudo apt-get clean && sudo apt-get update;
