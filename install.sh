@@ -66,3 +66,4 @@ bash $DOTFILES/ruby/install.sh
 bash $DOTFILES/node/install.sh
 bash $DOTFILES/neovim/install.sh
 bash $DOTFILES/tmux/install.sh
+bash $DOTFILES/ls_colors/install.sh
