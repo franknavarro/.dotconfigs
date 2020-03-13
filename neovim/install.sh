@@ -15,3 +15,4 @@ command -v nvim >/dev/null || {
 mkdir -p ~/.config/nvim &&
 git clone https://github.com/franknavarro/nvim.git ~/.config/nvim &&
 nvim --headless +PlugInstall +qa
+git config --global core.editor "nvim"
