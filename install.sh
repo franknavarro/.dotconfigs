@@ -56,7 +56,7 @@ nvm_detect_profile() {
 export DOTFILES=$(pwd)
 export PROFILE="$(nvm_detect_profile)"
 
-echo ". ${DOTFILES}/profile" >> $PROFILE
+echo ". ${DOTFILES}/bash/profile" >> $PROFILE
 
 LINUX_PACKAGES=$DOTFILES/packages.txt
 sudo apt-get clean && sudo apt-get update;
