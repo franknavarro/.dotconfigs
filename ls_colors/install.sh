@@ -6,4 +6,4 @@ cd $HOME &&
   sudo sh install.sh &&
   source $HOME/.local/share/lscolors.sh &&
   echo ". $HOME/.local/share/lscolors.sh" >> $PROFILE &&
-  rm -r $HOME/LS_COLORS
+  rm -rf $HOME/LS_COLORS
