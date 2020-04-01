@@ -10,7 +10,7 @@ g++
 libevent-dev
 libffi-dev
 libgdbm-dev
-libgdbm5
+libgdbm3
 libncurses-dev
 libreadline6-dev
 libssl-dev
@@ -19,7 +19,6 @@ libtool
 libyaml-dev
 ninja-build
 pkg-config
-python3
 tar
 unzip
 zlib1g-dev
