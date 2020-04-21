@@ -6,7 +6,7 @@ command -v nvim >/dev/null || {
   git clone --depth=1 --single-branch --branch stable https://github.com/neovim/neovim.git $NEOVIM_SRC &&
 	cd $NEOVIM_SRC &&
 	make -s CMAKE_BUILD_TYPE=Release &&
-	make -s install &&
+	sudo make -s install &&
 	cd $DOTFILES &&
 	rm -rf $NEOVIM_SRC
 }
@@ -15,4 +15,3 @@ command -v nvim >/dev/null || {
 mkdir -p ~/.config/nvim &&
 git clone https://github.com/franknavarro/nvim.git ~/.config/nvim &&
 nvim --headless +PlugInstall +qa
-git config --global core.editor "nvim"

@@ -1,0 +1,5 @@
+[user]
+	name = Frank Navarro
+[core]
+	editor = nvim
+  excludesfiles = ~/.gitignore_global
