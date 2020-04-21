@@ -6,6 +6,7 @@ export TERM=xterm-256color
 export LANG=en_US.UTF-8
 export VISUAL=nvim
 export EDITOR="$VISUAL"
+<<<<<<< HEAD:profile
 
 function echo_nonempty() {
   if [[ ! -z "$1" ]]; then
@@ -93,3 +94,5 @@ function dexec() {
     echo " ** Or use the full name from the list above"
   fi
 }
+=======
+>>>>>>> 50b0148d3254c3ddc56d155bfc1a4a372055d8cc:bash/profile
