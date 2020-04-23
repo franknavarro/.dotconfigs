@@ -13,23 +13,21 @@ function echo_nonempty() {
   fi
 }
 
-alias dd="docker-compose down"
-alias du="docker-compose up -d"
-alias dls="docker container ls"
-alias dlsa="docker container ls -a"
-alias dl="docker logs -f"
-alias di="docker images"
-alias drm="docker"
-function dfi() {
+alias dd="docker-compose down --remove-orphans"
+alias dup="docker-compose up -d"
+alias dlog="docker logs -f"
+alias drm="docker container rm"
+function di() {
   docker image ls | grep $1
 }
-function dfc() {
+function dls() {
   # fuzzy search without namespace in the name
   # e.g. wiretest_ibanking_1 will not search wiretest
   # this case will be covered in full_name_search
 
   NO_HEADERS=0
   SHOW_ALL=0
+  FIELDS=""
   for arg in "$@"; do
     case $arg in
       --no-headers)
@@ -40,14 +38,43 @@ function dfc() {
         SHOW_ALL=1
         shift
       ;;
+      -f*|--format*)
+        FIELDS=$(echo "$arg" | sed -e 's/^[^= ]*[= ]\?//g')
+        shift
+        if [[ -z "$FIELDS" ]]; then
+          FIELDS="$1"
+          shift
+        fi
+      ;;
     esac
+  done
+
+  IFS=, read -r -a fields <<< "$FIELDS"
+  docker_format=""
+  for field in "${fields[@]}"; do
+    lowercase_field="${field,,}"
+    formatted_field="${lowercase_field^}"
+    case $formatted_field in
+      Id) formatted_field="ID" ;;
+      Createdat) formatted_field="CreatedAt" ;;
+      Runningfor) formatted_field="RunningFor" ;;
+    esac
+    docker_format+="{{.$formatted_field}}\t"
   done
 
   containers=""
   if [[ "$SHOW_ALL" -eq 1 ]]; then
-    containers=$(docker container ls -a)
+    if [[ -z "$docker_format" ]]; then
+      containers=$(docker container ls -a)
+    else
+      containers=$(docker container ls -a --format "table $docker_format{{.Names}}")
+    fi
   else
-    containers=$(docker container ls)
+    if [[ -z "$docker_format" ]]; then
+      containers=$(docker container ls)
+    else
+      containers=$(docker container ls --format "table $docker_format{{.Names}}")
+    fi
   fi
 
   headers=""
@@ -74,11 +101,9 @@ function dfc() {
   fi
 
 }
-function dexec() {
-  search_results=$(dfc --no-headers $1 | awk '{print $NF}')
+function dfi() {
+  search_results=$(dls --no-headers $1 | awk '{print $NF}')
   search_results_count=$(wc -w <<< "$search_results")
-  echo $search_results
-  echo $search_results_count
 
   if [ $search_results_count -eq "1" ]; then
     docker exec -it $search_results bash
@@ -92,4 +117,19 @@ function dexec() {
     echo " ** Please use the unique key word in the name"
     echo " ** Or use the full name from the list above"
   fi
+}
+function filesize() {
+  check_dir="."
+  if [[ ! -z "$1" ]]; then
+    check_dir="$1"
+  fi
+
+  dir_sizes=$(du -h -d 1 "$check_dir" | sort -nr)
+  IFS=, read -r -a units <<< "Y,Z,E,P,T,G,M,K"
+  sorted_dirs=""
+
+  for unit in "${units[@]}"; do
+    sorted_dirs+=$(echo "$dir_sizes" | awk '$1 ~ /'"$unit"'$/ {print}' )
+  done
+  echo "$sorted_dirs"
 }
