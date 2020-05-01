@@ -2,4 +2,13 @@
 	name = Frank Navarro
 [core]
 	editor = nvim
-  excludesfiles = ~/.gitignore_global
+  excludesfile = ~/.gitignore_global
+[alias]
+	s = status
+  d = diff
+  cm = commit
+  co = checkout
+  A = add -A
+  unstage = reset HEAD --
+  last = log -1 HEAD
+  conf = config --global --edit
