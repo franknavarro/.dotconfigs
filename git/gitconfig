@@ -4,6 +4,7 @@
 	editor = nvim
   excludesfile = ~/.gitignore_global
 [alias]
+  l = log
   p = push
 	s = status
   d = diff
@@ -15,3 +16,4 @@
   unstage = reset HEAD --
   last = log -1 HEAD
   conf = config --global --edit
+  conf-local = config --edit
