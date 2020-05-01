@@ -4,11 +4,14 @@
 	editor = nvim
   excludesfile = ~/.gitignore_global
 [alias]
+  p = push
 	s = status
   d = diff
-  cm = commit
-  co = checkout
+  a = add
   A = add -A
+  cm = commit
+  ca = commit -a
+  co = checkout
   unstage = reset HEAD --
   last = log -1 HEAD
   conf = config --global --edit
