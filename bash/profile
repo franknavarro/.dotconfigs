@@ -82,10 +82,10 @@ function dls() {
     headers=$(echo "$containers" | awk 'NR==1 {print}')
   fi
 
-  fuzzy_search_results=$(echo "$containers" | awk '$NF ~ /.*_.*'"$1"'.*/ {print}')
+  fuzzy_search_results=$(echo "$containers" | tail -n+2 | awk '$NF ~ /.*'"$1"'.*/ {print}' )
   fuzzy_search_count=$(wc -w <<< $fuzzy_search_results)
 
-  full_name_search_result=$(echo "$containers" | awk -v n=$1 '$NF == $n {print}')
+  full_name_search_result=$(echo "$containers" | tail -n+2 | awk -v n=$1 '$NF == $n {print}' )
   full_name_search_count=$(wc -w <<< $full_name_search_result)
 
   if [ $fuzzy_search_count -ge 1 ]; then
