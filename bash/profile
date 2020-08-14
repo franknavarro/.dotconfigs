@@ -145,7 +145,7 @@ function _set_ps1() {
   local red=160
   local orange=178
   local darkergrey=233
-  local darkgrey=237
+  local darkgrey=239
   local black=16
   local white=255
 
@@ -178,7 +178,11 @@ function _set_ps1() {
         deliminator=" "
       fi
       if [ $path_len -gt $2 ] && (( $path_index < ${#path[*]}-1 )); then
-        path_str="${path_str}${deliminator}${current_dir:0:2} "
+        local dir_len=2
+        if [ "${current_dir:0:1}" == "." ]; then
+          ((dir_len++))
+        fi
+        path_str="${path_str}${deliminator}${current_dir:0:dir_len} "
       else
         path_str="${path_str}${deliminator}${current_dir} "
       fi
