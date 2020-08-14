@@ -7,17 +7,6 @@ export LANG=en_US.UTF-8
 export VISUAL=nvim
 export EDITOR="$VISUAL"
 
-function _dir_chomp () {
-	local IFS=/ path_index=1 current_dir
-	local path=(${1/#$HOME/\~}) r_path=${path[*]}
-	local path_len=${#r_path}
-	while ((path_len > $2 && path_index < ${#path[*]}-1))
-	do
-		current_dir=${path[path_index]}
-		path[path_index++]=${current_dir:0:2}
-	done
-	echo "${path[*]}"
-}
 
 
 function echo_nonempty() {
@@ -147,24 +136,73 @@ function filesize() {
   echo "$sorted_dirs"
 }
 
-function _format_ps1 () {
-	if [[ "$TERM" =~ 256color ]]; then
-		local green=28
-		local yellow=226
-		local orange=178
-		local black=16
-		local white=255
+function _set_ps1() {
+  local EXIT="$?"
 
-		local color1="$green"
-		local text_color_1="$white"
-		local color2="$yellow"
-		local text_color_2="$black"
-		local color3="$orange"
-		local text_color_3="$black"
-		export PS1="\\033[38;5;${text_color_1};48;5;${color1}m \u \e[38;5;${color1};48;5;${color2}m\e[38;5;${text_color_2}m \h \e[38;5;${color2};48;5;${color3}m\e[38;5;${text_color_3}m $(_dir_chomp "$(pwd)" 20) \e[m\e[38;5;${color3}m \e[m"
-  else
-		export PS1="\e[42m \u \e[32;43m\e[m\e[43m \h \e[33;44m\e[m\e[44m $(_dir_chomp "$(pwd)" 20) \e[0;34m \e[m"
-	fi
+  local green=28
+  local blue=51
+  local yellow=226
+  local red=160
+  local orange=178
+  local darkergrey=233
+  local darkgrey=237
+  local black=16
+  local white=255
+
+  local home_color="$blue"
+  local home_text="$black"
+  local dir_color="$darkgrey"
+  local dir_text="$white"
+
+  local dolor_color="$green"
+  if [ $EXIT != 0 ]; then
+    dolor_color="$red"
+  fi
+  local dolor_text="$white"
+
+  function _format_pwd () {
+    local IFS=/ path_index=0 current_dir
+    local path=(${1/#$HOME/\~}) r_path=${path[*]}
+    local path_len=${#r_path}
+    local home=""
+    local path_str=""
+    if [[ "${path[0]}" = "~" ]]; then
+      home="\e[38;5;${home_text};48;5;${home_color}m ~ "
+    fi
+    path=("${path[@]:1}")
+    while ((path_index < ${#path[*]}))
+    do
+      current_dir=${path[path_index]}
+      local deliminator=" "
+      if [ $path_index -eq 0 ]; then
+        deliminator=" "
+      fi
+      if [ $path_len -gt $2 ] && (( $path_index < ${#path[*]}-1 )); then
+        path_str="${path_str}${deliminator}${current_dir:0:2} "
+      else
+        path_str="${path_str}${deliminator}${current_dir} "
+      fi
+      ((path_index++))
+    done
+    local home_deliminator=""
+    if [ -n "$home" ]; then
+      local home_delim_color="$dir_color"
+      if [ $path_index -eq 0 ]; then
+        home_delim_color="$dolor_color"
+      fi
+      home_deliminator="\e[38;5;${home_color};48;5;${home_delim_color}m"
+    fi
+    if [ $path_index -eq 0 ] && [ -n "$home" ]; then
+      echo "${home}${home_deliminator}"
+    else
+      if [ $path_index -eq 0 ]; then
+        path_str=" / "
+      fi
+      echo "${home}${home_deliminator}\e[38;5;${dir_text};48;5;${dir_color}m${path_str}\e[m\e[38;5;${dir_color};48;5;${dolor_color}m"
+    fi
+  }
+
+  PS1="$(_format_pwd "$(pwd)" 20)\e[38;5;${dolor_text}m \\$ \e[m\e[38;5;${dolor_color}m\e[m"
 }
 
-_format_ps1
+PROMPT_COMMAND=_set_ps1
