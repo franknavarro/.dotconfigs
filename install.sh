@@ -162,9 +162,7 @@ xargs sudo apt-get install -y <$LINUX_PACKAGES
 
 if [ "$PYTHON_INSTALL" = true ] ; then
   echo 'INSTALLING PYTHON'
-  command -v python3 || {
-    sudo apt-get install -y python3
-  }
+  bash $DOTFILES/python/install.sh
 fi
 if [ "$RUBY_INSTALL" = true ] ; then
   echo 'INSTALLING RUBY'
