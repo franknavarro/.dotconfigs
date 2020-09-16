@@ -167,7 +167,7 @@ function _set_ps1() {
     local home=""
     local path_str=""
     if [[ "${path[0]}" = "~" ]]; then
-      home="\e[38;5;${home_text};48;5;${home_color}m ~ "
+      home="\[\e[38;5;${home_text};48;5;${home_color}m\] ~ "
     fi
     path=("${path[@]:1}")
     while ((path_index < ${#path[*]}))
@@ -194,7 +194,7 @@ function _set_ps1() {
       if [ $path_index -eq 0 ]; then
         home_delim_color="$dolor_color"
       fi
-      home_deliminator="\e[38;5;${home_color};48;5;${home_delim_color}m"
+      home_deliminator="\[\e[38;5;${home_color};48;5;${home_delim_color}m\]"
     fi
     if [ $path_index -eq 0 ] && [ -n "$home" ]; then
       echo "${home}${home_deliminator}"
@@ -202,11 +202,11 @@ function _set_ps1() {
       if [ $path_index -eq 0 ]; then
         path_str=" / "
       fi
-      echo "${home}${home_deliminator}\e[38;5;${dir_text};48;5;${dir_color}m${path_str}\e[m\e[38;5;${dir_color};48;5;${dolor_color}m"
+      echo "${home}${home_deliminator}\[\e[38;5;${dir_text};48;5;${dir_color}m\]${path_str}\[\e[m\e[38;5;${dir_color};48;5;${dolor_color}m\]"
     fi
   }
 
-  PS1="$(_format_pwd "$(pwd)" 20)\e[38;5;${dolor_text}m \\$ \e[m\e[38;5;${dolor_color}m\e[m"
+  PS1="$(_format_pwd "$(pwd)" 20)\[\e[38;5;${dolor_text}m\] \\$ \[\e[m\e[38;5;${dolor_color}m\]\[\e[m\]"
 }
 
 PROMPT_COMMAND=_set_ps1
