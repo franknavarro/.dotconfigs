@@ -72,15 +72,19 @@ install_dotconfigs_help() {
 EXCEPT_LIST=""
 ONLY_LIST=""
 
-RUBY_INSTALL=true
-NODE_INSTALL=true
-NEOVIM_INSTALL=true
-TMUX_INSTALL=true
-LS_COLORS_INSTALL=true
-RIPGREP_INSTALL=true
+BREW_INSTALL=true
 GIT_INSTALL=true
+LS_COLORS_INSTALL=true
+NEOVIM_INSTALL=true
+NODE_INSTALL=true
+PACKAGE_INSTALL=true
 PYTHON_INSTALL=true
+RIPGREP_INSTALL=true
+RUBY_INSTALL=true
+TMUX_INSTALL=true
+
 PACKAGE_FILE="debian.txt"
+BREW_PACKAGE_FILE="brew.txt"
 
 for arg in "$@"; do
   case $arg in
@@ -97,14 +101,16 @@ for arg in "$@"; do
       fi
     ;;
     -o*|--only*)
+      BREW_INSTALL=false
+      GIT_INSTALL=false
       RUBY_INSTALL=false
       NODE_INSTALL=false
       NEOVIM_INSTALL=false
       TMUX_INSTALL=false
       LS_COLORS_INSTALL=false
       RIPGREP_INSTALL=false
-      GIT_INSTALL=false
       PYTHON_INSTALL=false
+      PACKAGES_INSTALL=false
       ONLY_LIST=$(echo "$arg" | sed -e 's/^[^= ]*[= ]\?//g')
       shift
       if [[ -z "$ONLY_LIST" ]]; then
@@ -125,28 +131,32 @@ IFS=, read -r -a except_list <<< "$EXCEPT_LIST"
 for only in "${only_list[@]}"; do
   only="${only,,}"
   case $only in
-    ruby) RUBY_INSTALL=true ;;
-    node) NODE_INSTALL=true ;;
-    neovim|nvim) NEOVIM_INSTALL=true ;;
-    tmux) TMUX_INSTALL=true ;;
-    ls_colors) LS_COLORS_INSTALL=true ;;
-    ripgrep) RIPGREP_INSTALL=true ;;
+    brew|homebrew) BREW_INSTALL=true ;;
     git) GIT_INSTALL=true ;;
+    ls_colors) LS_COLORS_INSTALL=true ;;
+    neovim|nvim) NEOVIM_INSTALL=true ;;
+    node) NODE_INSTALL=true ;;
+    packages) PACKAGE_INSTALL=true ;;
     python) PYTHON_INSTALL=true ;;
+    ripgrep) RIPGREP_INSTALL=true ;;
+    ruby) RUBY_INSTALL=true ;;
+    tmux) TMUX_INSTALL=true ;;
   esac
 done
 
 for except in "${except_list[@]}"; do
   except="${except,,}"
   case $except in
-    ruby) RUBY_INSTALL=false ;;
-    node) NODE_INSTALL=false ;;
-    neovim|nvim) NEOVIM_INSTALL=false ;;
-    tmux) TMUX_INSTALL=false ;;
-    ls_colors) LS_COLORS_INSTALL=false ;;
-    ripgrep) RIPGREP_INSTALL=false ;;
     git) GIT_INSTALL=false ;;
+    homebrew|brew) BREW_INSTALL=false ;;
+    ls_colors) LS_COLORS_INSTALL=false ;;
+    neovim|nvim) NEOVIM_INSTALL=false ;;
+    node) NODE_INSTALL=false ;;
+    packages) PACKAGE_INSTALL=true ;;
     python) PYTHON_INSTALL=false ;;
+    ripgrep) RIPGREP_INSTALL=false ;;
+    ruby) RUBY_INSTALL=false ;;
+    tmux) TMUX_INSTALL=false ;;
   esac
 done
 
@@ -156,9 +166,26 @@ echo $PROFILE
 
 echo ". ${DOTFILES}/bash/profile" >> $PROFILE
 
-LINUX_PACKAGES=$DOTFILES/packages/$PACKAGE_FILE
-sudo apt-get clean && sudo apt-get update;
-xargs sudo apt-get install -y <$LINUX_PACKAGES
+export MACHINE_NAME=$(uname -s)
+
+case "$MACHINE_NAME" in
+  Linux*)
+    echo 'INSTALLING LINUX PACKAGES'
+    LINUX_PACKAGES=$DOTFILES/packages/$PACKAGE_FILE
+    sudo apt-get clean && sudo apt-get update;
+    xargs sudo apt-get install -y <$LINUX_PACKAGES
+  ;;
+  Darwin*)
+    if [ "$BREW_INSTALL" = true ] ; then
+      echo 'INSTALLING HOMEBREW'
+      bash $DOTFILES/brew/install.sh
+
+      echo 'INSTALLING HOMEBREW PACKAGES'
+      BREW_PACKAGES=$DOTFILES/packages/$BREW_PACKAGE_FILE
+      xargs brew install <$BREW_PACKAGES
+    fi
+  ;;
+esac
 
 if [ "$PYTHON_INSTALL" = true ] ; then
   echo 'INSTALLING PYTHON'
