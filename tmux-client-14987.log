@@ -1,0 +1,45 @@
+1610004247.692842 client started (14987): version 3.1, socket /private/tmp/tmux-501/default, protocol 8
+1610004247.692968 on Darwin 20.2.0 Darwin Kernel Version 20.2.0: Wed Dec  2 20:39:59 PST 2020; root:xnu-7195.60.75~1/RELEASE_X86_64; libevent 2.1.12-stable (select)
+1610004247.693127 socket is /private/tmp/tmux-501/default
+1610004247.693183 trying connect
+1610004247.693257 connect failed: Connection refused
+1610004247.693360 lock file is /private/tmp/tmux-501/default.lock
+1610004247.693613 flock succeeded
+1610004247.693639 got lock (6)
+1610004247.693665 trying connect
+1610004247.693704 connect failed: Connection refused
+1610004247.695589 add peer 0x7f8bcd531000: 7 (0x0)
+1610004247.698983 sending message 100 to peer 0x7f8bcd531000 (4 bytes)
+1610004247.699051 sending message 101 to peer 0x7f8bcd531000 (15 bytes)
+1610004247.699079 sending message 102 to peer 0x7f8bcd531000 (13 bytes)
+1610004247.699099 sending message 108 to peer 0x7f8bcd531000 (40 bytes)
+1610004247.699135 sending message 104 to peer 0x7f8bcd531000 (0 bytes)
+1610004247.699155 sending message 107 to peer 0x7f8bcd531000 (4 bytes)
+1610004247.699174 sending message 105 to peer 0x7f8bcd531000 (28 bytes)
+1610004247.699193 sending message 105 to peer 0x7f8bcd531000 (16 bytes)
+1610004247.699224 sending message 105 to peer 0x7f8bcd531000 (20 bytes)
+1610004247.699243 sending message 105 to peer 0x7f8bcd531000 (57 bytes)
+1610004247.699261 sending message 105 to peer 0x7f8bcd531000 (25 bytes)
+1610004247.699284 sending message 105 to peer 0x7f8bcd531000 (35 bytes)
+1610004247.699304 sending message 105 to peer 0x7f8bcd531000 (53 bytes)
+1610004247.699322 sending message 105 to peer 0x7f8bcd531000 (26 bytes)
+1610004247.699339 sending message 105 to peer 0x7f8bcd531000 (66 bytes)
+1610004247.699357 sending message 105 to peer 0x7f8bcd531000 (50 bytes)
+1610004247.699375 sending message 105 to peer 0x7f8bcd531000 (40 bytes)
+1610004247.699392 sending message 105 to peer 0x7f8bcd531000 (44 bytes)
+1610004247.699426 sending message 105 to peer 0x7f8bcd531000 (17 bytes)
+1610004247.699449 sending message 105 to peer 0x7f8bcd531000 (14 bytes)
+1610004247.699468 sending message 105 to peer 0x7f8bcd531000 (19 bytes)
+1610004247.699486 sending message 105 to peer 0x7f8bcd531000 (8 bytes)
+1610004247.699504 sending message 105 to peer 0x7f8bcd531000 (33 bytes)
+1610004247.699520 sending message 105 to peer 0x7f8bcd531000 (29 bytes)
+1610004247.699537 sending message 105 to peer 0x7f8bcd531000 (22 bytes)
+1610004247.699556 sending message 106 to peer 0x7f8bcd531000 (0 bytes)
+1610004247.699580 sending message 200 to peer 0x7f8bcd531000 (4 bytes)
+1610004247.699601 client loop enter
+1610004247.871397 peer 0x7f8bcd531000 message 207
+1610004247.871554 sending message 208 to peer 0x7f8bcd531000 (0 bytes)
+1610004249.632397 peer 0x7f8bcd531000 message 203
+1610004249.632437 sending message 205 to peer 0x7f8bcd531000 (0 bytes)
+1610004249.633827 peer 0x7f8bcd531000 message 204
+1610004249.633884 client loop exit
