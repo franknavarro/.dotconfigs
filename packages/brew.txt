@@ -1,0 +1,12 @@
+openssl
+readline
+sqlite3
+xz
+zlib
+ninja
+libtool
+automake
+cmake
+pkg-config
+gettext
+libevent

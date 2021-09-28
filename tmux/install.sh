@@ -1,5 +1,5 @@
 command -v tmux >/dev/null || {
-	TMUX_VERSION=3.0
+	TMUX_VERSION=3.1
 	cd $HOME
 	curl -LOsS https://github.com/tmux/tmux/releases/download/${TMUX_VERSION}/tmux-${TMUX_VERSION}.tar.gz &&
 	tar xf tmux-${TMUX_VERSION}.tar.gz &&
