@@ -164,6 +164,7 @@ export DOTFILES=$(pwd)
 export PROFILE="$(nvm_detect_profile)"
 echo $PROFILE
 
+# Source .dotconfigs profile
 echo ". ${DOTFILES}/bash/profile" >> $PROFILE
 
 export MACHINE_NAME=$(uname -s)
@@ -187,6 +188,7 @@ case "$MACHINE_NAME" in
   ;;
 esac
 
+# Download applications
 if [ "$PYTHON_INSTALL" = true ] ; then
   echo 'INSTALLING PYTHON'
   bash $DOTFILES/python/install.sh

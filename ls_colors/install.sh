@@ -1,5 +1,6 @@
 #!/bin/bash
 
+echo "Installing LS_COLORS"
 cd $HOME &&
   mkdir -p $HOME/.local/share &&
   git clone https://github.com/trapd00r/LS_COLORS.git $HOME/LS_COLORS &&
