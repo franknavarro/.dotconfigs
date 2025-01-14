@@ -1,0 +1,119 @@
+#!/bin/bash
+# Aliases and commands for docker
+
+alias dd="docker-compose down --remove-orphans"
+alias dup="docker-compose up -d"
+alias dlog="docker logs -f"
+alias drm="docker container rm"
+
+function echo_nonempty() {
+  if [[ ! -z "$1" ]]; then
+    echo "$1"
+  fi
+}
+
+# Docker image search
+function di() {
+  docker image ls | grep $1
+}
+
+
+function dls() {
+  # fuzzy search without namespace in the name
+  # e.g. wiretest_ibanking_1 will not search wiretest
+  # this case will be covered in full_name_search
+
+  NO_HEADERS=0
+  SHOW_ALL=0
+  FIELDS=""
+  for arg in "$@"; do
+    case $arg in
+      --no-headers)
+        NO_HEADERS=1
+        shift
+      ;;
+      -a|--all)
+        SHOW_ALL=1
+        shift
+      ;;
+      -f*|--format*)
+        FIELDS=$(echo "$arg" | sed -e 's/^[^= ]*[= ]\?//g')
+        shift
+        if [[ -z "$FIELDS" ]]; then
+          FIELDS="$1"
+          shift
+        fi
+      ;;
+    esac
+  done
+
+  IFS=, read -r -a fields <<< "$FIELDS"
+  docker_format=""
+  for field in "${fields[@]}"; do
+    lowercase_field="${field,,}"
+    formatted_field="${lowercase_field^}"
+    case $formatted_field in
+      Id) formatted_field="ID" ;;
+      Createdat) formatted_field="CreatedAt" ;;
+      Runningfor) formatted_field="RunningFor" ;;
+    esac
+    docker_format+="{{.$formatted_field}}\t"
+  done
+
+  containers=""
+  if [[ "$SHOW_ALL" -eq 1 ]]; then
+    if [[ -z "$docker_format" ]]; then
+      containers=$(docker container ls -a)
+    else
+      containers=$(docker container ls -a --format "table $docker_format{{.Names}}")
+    fi
+  else
+    if [[ -z "$docker_format" ]]; then
+      containers=$(docker container ls)
+    else
+      containers=$(docker container ls --format "table $docker_format{{.Names}}")
+    fi
+  fi
+
+  headers=""
+  if [[ "$NO_HEADERS" -eq 0 ]]; then
+    headers=$(echo "$containers" | awk 'NR==1 {print}')
+  fi
+
+  fuzzy_search_results=$(echo "$containers" | tail -n+2 | awk '$NF ~ /.*'"$1"'.*/ {print}' )
+  fuzzy_search_count=$(wc -w <<< $fuzzy_search_results)
+
+  full_name_search_result=$(echo "$containers" | tail -n+2 | awk -v n=$1 '$NF == $n {print}' )
+  full_name_search_count=$(wc -w <<< $full_name_search_result)
+
+  if [ $fuzzy_search_count -ge 1 ]; then
+    echo_nonempty "$headers"
+    echo "$fuzzy_search_results"
+  else
+    if [ $full_name_search_count -eq "1" ]; then
+      echo_nonempty "$headers"
+      echo "$full_name_search_result"
+    else
+      echo_nonempty "$headers"
+    fi
+  fi
+
+}
+
+function dfi() {
+  search_results=$(dls --no-headers $1 | awk '{print $NF}')
+  search_results_count=$(wc -w <<< "$search_results")
+
+  if [ $search_results_count -eq "1" ]; then
+    docker exec -it $search_results bash
+  elif [ $search_results_count -eq "0" ]; then
+    echo " ** Cannot find any container with that name"
+  else
+    echo " ** Multiple conntainers are found with that name"
+    echo "################################"
+    echo "$search_results"
+    echo "################################"
+    echo " ** Please use the unique key word in the name"
+    echo " ** Or use the full name from the list above"
+  fi
+}
