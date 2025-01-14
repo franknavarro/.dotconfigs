@@ -1,5 +1,6 @@
 [user]
 	name = Frank Navarro
+	email = fnavarro7777@gmail.com
 [core]
 	editor = nvim
   excludesfile = ~/.gitignore_global

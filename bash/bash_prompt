@@ -1,0 +1,99 @@
+#!/bin/bash
+# Sets the bash command prompt line
+
+function _set_ps1() {
+  local EXIT="$?"
+
+  local green=28
+  local blue=51
+  local yellow=226
+  local red=160
+  local orange=178
+  local darkergrey=233
+  local darkgrey=239
+  local black=16
+  local white=255
+
+  local home_color="$blue"
+  local home_text="$black"
+  local dir_color="$darkgrey"
+  local dir_text="$white"
+
+  local dolor_color="$green"
+  if [ $EXIT != 0 ]; then
+    dolor_color="$red"
+  fi
+  local dolor_text="$white"
+
+  function _set_background () {
+    echo "48;5;${1}"
+  }
+
+  function _set_foreground () {
+    echo "38;5;${1}"
+  }
+
+  function _colorize () {
+    local background=""
+    if [ -n "$1" ]; then
+      background="$(_set_background "$1");"
+    fi
+    local foreground=""
+    if [ -n "$2" ]; then
+      foreground="$(_set_foreground "$2")"
+    fi
+    echo "\[\e[m\]\[\e[${background}${foreground}m\]"
+  }
+
+  function _format_pwd () {
+    local IFS=/ path_index=0 current_dir
+    local path=(${1/#$HOME/\~}) r_path=${path[*]}
+    local path_len=${#r_path}
+    local home=""
+    local path_str=""
+    if [[ "${path[0]}" = "~" ]]; then
+      home="$(_colorize "$home_color" "$home_text") ~ "
+    fi
+
+    for (( path_index=1; path_index<${#path[@]}; path_index++ ))
+    do
+      current_dir=${path[path_index]}
+      local deliminator=" "
+      if [ $path_index -eq 1 ]; then
+        deliminator=" "
+      fi
+
+      if [ $path_len -gt $2 ] && (( $path_index < ${#path[*]}-1 )); then
+        local dir_len=2
+        if [ "${current_dir:0:1}" == "." ]; then
+          ((dir_len++))
+        fi
+        path_str="${path_str}${deliminator}${current_dir:0:dir_len} "
+      else
+        path_str="${path_str}${deliminator}${current_dir} "
+      fi
+    done
+
+    local home_deliminator=""
+    if [ -n "$home" ]; then
+      local home_delim_color="$dir_color"
+      if [ $path_index -eq 1 ]; then
+        home_delim_color="$dolor_color"
+      fi
+      home_deliminator="$(_colorize "$home_delim_color" "$home_color")"
+    fi
+    if [ $path_index -eq 1 ] && [ -n "$home" ]; then
+      echo "${home}${home_deliminator}"
+    else
+      if [ $path_index -eq 1 ]; then
+        path_str=" / "
+      fi
+      echo "${home}${home_deliminator}$(_colorize "$dir_color" "$dir_text")${path_str}$(_colorize "$dolor_color" "$dir_color")"
+    fi
+  }
+
+  local end_deliminator="$(_colorize "$dolor_color" "$dolor_text") \\$ $(_colorize "" "$dolor_color")$(_colorize "" "")"
+  PS1="$(_format_pwd "$(pwd)" 20)$end_deliminator"
+}
+
+PROMPT_COMMAND=_set_ps1

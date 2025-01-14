@@ -72,7 +72,7 @@ install_dotconfigs_help() {
 EXCEPT_LIST=""
 ONLY_LIST=""
 
-BREW_INSTALL=true
+BREW_INSTALL=false
 GIT_INSTALL=true
 LS_COLORS_INSTALL=true
 NEOVIM_INSTALL=true
@@ -164,8 +164,10 @@ export DOTFILES=$(pwd)
 export PROFILE="$(nvm_detect_profile)"
 echo $PROFILE
 
-# Source .dotconfigs profile
+# Source .dotconfigs profile and all bash files
 echo ". ${DOTFILES}/bash/profile" >> $PROFILE
+echo ". ${DOTFILES}/bash/docker_commands" >> $PROFILE
+echo ". ${DOTFILES}/bash/bash_prompt" >> $PROFILE
 
 export MACHINE_NAME=$(uname -s)
 
