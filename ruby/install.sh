@@ -1,7 +1,7 @@
 #!/bin/bash
 
 command -v rbenv || {
-	RUBY_VERSION=2.7.0
+	RUBY_VERSION=4.0.6
 	RBENV_ROOT=$HOME/.rbenv
 	git clone --depth=1 https://github.com/rbenv/rbenv.git $RBENV_ROOT &&
 	git clone --depth=1 https://github.com/rbenv/ruby-build.git $RBENV_ROOT/plugins/ruby-build &&

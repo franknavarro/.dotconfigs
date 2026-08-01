@@ -18,3 +18,27 @@
   last = log -1 HEAD
   conf = config --global --edit
   conf-local = config --edit
+  histedit = rebase -i main
+  # Mercurial like commands for git
+  edit = rebase -i main
+  change = rebase -i main
+  continue = "!git add . && git commit --amend --no-edit && git rebase --continue"
+  up = "!mercurial_upload() { \
+    git push origin HEAD:refs/for/${1:-main}; \
+  }; mercurial_upload"
+  amend="!mercurial_amend() { \
+    git add -A && git commit --amend --no-edit; \
+  }; mercurial_amend"
+  amend-up="!mercurial_amend_upload() { \
+    git add -A && git commit --amend --no-edit && git up ${1:-main}; \
+  }; mercurial_amend_upload"
+  cl = "!mercurial_commit() { \
+    git add -A && git commit && git up ${1:-main}; \
+  }; mercurial_commit"
+  sync = "!mercial_sync() { \
+    git pull origin ${1:-main} --rebase && git branch --force main origin/${1:-main}; \
+  }; mercial_sync"
+  reword = "commit --amend"
+  prev = "checkout HEAD~1"
+  p = "checkout HEAD~1"
+  xl = "log --all --graph --oneline --decorate ^main~1"

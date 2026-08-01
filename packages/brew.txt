@@ -4,10 +4,13 @@ gettext
 jq
 libevent
 libtool
+libyaml
+neovim
 ninja
 openssl
 pkg-config
 readline
 sqlite3
+tmux
 xz
 zlib
