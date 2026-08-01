@@ -13,6 +13,8 @@ function _set_ps1() {
   local darkgrey=239
   local black=16
   local white=255
+  local brightBlue=69
+  local brightGreen=76
 
   local home_color="$blue"
   local home_text="$black"
@@ -92,8 +94,13 @@ function _set_ps1() {
     fi
   }
 
+  bind 'set show-mode-in-prompt on'
+  bind "set vi-ins-mode-string \"\1\e[38;5;${black};48;5;${brightGreen}m\2 ++ \""
+  bind "set vi-cmd-mode-string \"\1\e[38;5;${black};48;5;${brightBlue}m\2 |> \""
+
   local end_deliminator="$(_colorize "$dolor_color" "$dolor_text") \\$ $(_colorize "" "$dolor_color")$(_colorize "" "")"
   PS1="$(_format_pwd "$(pwd)" 20)$end_deliminator"
 }
+
 
 PROMPT_COMMAND=_set_ps1
