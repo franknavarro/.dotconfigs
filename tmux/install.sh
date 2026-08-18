@@ -12,4 +12,6 @@ command -v tmux >/dev/null || {
 	rm -f $HOME/tmux-${TMUX_VERSION}.tar.gz
 }
 
+chmod +x $DOTFILES/tmux/session_tabs.sh
 ln -s -f $DOTFILES/tmux/tmux.conf $HOME/.tmux.conf
+
