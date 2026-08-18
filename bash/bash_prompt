@@ -102,5 +102,8 @@ function _set_ps1() {
   PS1="$(_format_pwd "$(pwd)" 20)$end_deliminator"
 }
 
-
-PROMPT_COMMAND=_set_ps1
+if [ -n "$(LC_ALL=C type -t _set_ps1_custom)" ] && [ "$(LC_ALL=C type -t _set_ps1_custom)" = function ]; then
+  PROMPT_COMMAND=_set_ps1_custom
+else
+  PROMPT_COMMAND=_set_ps1
+fi
