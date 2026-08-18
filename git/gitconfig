@@ -1,13 +1,13 @@
 [user]
-	name = Frank Navarro
-	email = fnavarro7777@gmail.com
+  name = Frank Navarro
+  email = fnavarro7777@gmail.com
 [core]
-	editor = nvim
+  editor = nvim
   excludesfile = ~/.gitignore_global
 [alias]
   l = log
   p = push
-	s = status
+  s = status
   d = diff
   a = add
   A = add -A
@@ -18,8 +18,9 @@
   last = log -1 HEAD
   conf = config --global --edit
   conf-local = config --edit
-  histedit = rebase -i main
+  tree = log --all --decorate --oneline --graph
   # Mercurial like commands for git
+  histedit = rebase -i main
   edit = rebase -i main
   change = rebase -i main
   continue = "!git add . && git commit --amend --no-edit && git rebase --continue"
@@ -42,3 +43,6 @@
   prev = "checkout HEAD~1"
   p = "checkout HEAD~1"
   xl = "log --all --graph --oneline --decorate ^main~1"
+
+[include]
+  path = ~/.gitconfig.local
