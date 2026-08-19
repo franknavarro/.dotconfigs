@@ -1,9 +1,13 @@
 #!/bin/bash
 
-current_session="$(tmux display-message -p '#S' 2>/dev/null)"
-sessions="$(tmux list-sessions -F "#{session_name}" 2>/dev/null)"
-
 is_prefix="$1"
+current_session="$2"
+
+if [[ -z "$current_session" ]]; then
+  current_session="$(tmux display-message -p '#S' 2>/dev/null)"
+fi
+
+sessions="$(tmux list-sessions -F "#{session_name}" 2>/dev/null)"
 
 bg_main="#44475a"
 
