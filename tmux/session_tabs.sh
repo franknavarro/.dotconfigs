@@ -6,38 +6,30 @@ sessions="$(tmux list-sessions -F "#{session_name}" 2>/dev/null)"
 is_prefix="$1"
 
 bg_main="#44475a"
-fg_active="#000000"
-if [ "$is_prefix" = "1" ]; then
-  bg_active="#00ff22"
-else
-  bg_active="#ffff00"
-fi
-fg_inactive="#f8f8f2"
-delim_color="#6272a4"
 
-output=""
-prev_active=false
-first=true
+# Header badge responds to prefix/leader
+fg_header="#000000"
+if [ "$is_prefix" = "1" ]; then
+  bg_header="#00ff22"
+else
+  bg_header="#ffff00"
+fi
+
+# Selected session: constant distinct accent color (purple)
+bg_selected="#bd93f9"
+fg_selected="#000000"
+
+text_main="#ffffff"
+left_seperator=""
+
+output="#[fg=$fg_header,bg=$bg_header,bold] ❒ SESSIONS #[fg=$bg_header,bg=$bg_main]$left_seperator "
 
 for s in $sessions; do
   if [[ "$s" == "$current_session" ]]; then
-    if [ "$first" = true ]; then
-      output+="#[fg=$fg_active,bg=$bg_active,bold] ❒ $s #[fg=$bg_active,bg=$bg_main]"
-    else
-      output+="#[fg=$bg_main,bg=$bg_active]#[fg=$fg_active,bg=$bg_active,bold] ❒ $s #[fg=$bg_active,bg=$bg_main]"
-    fi
-    prev_active=true
+    output+="#[fg=$bg_main,bg=$bg_selected]$left_seperator#[fg=$fg_selected,bg=$bg_selected,bold] $s #[fg=$bg_selected,bg=$bg_main]$left_seperator"
   else
-    if [ "$first" = true ]; then
-      output+="#[fg=$fg_inactive,bg=$bg_main] $s "
-    elif [ "$prev_active" = true ]; then
-      output+="#[fg=$fg_inactive,bg=$bg_main] $s "
-    else
-      output+="#[fg=$delim_color]#[fg=$fg_inactive,bg=$bg_main] $s "
-    fi
-    prev_active=false
+    output+="#[fg=$text_main,bg=$bg_main] $s "
   fi
-  first=false
 done
 
 echo "$output"
