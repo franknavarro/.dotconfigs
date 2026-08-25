@@ -25,15 +25,25 @@ fg_selected="#000000"
 
 text_main="#ffffff"
 left_seperator=""
+left_separator_sub=""
 
 output="#[fg=$fg_header,bg=$bg_header,bold] ❒ SESSIONS #[fg=$bg_header,bg=$bg_main]$left_seperator "
+
+prev_is_active=false
+is_first=true
 
 for s in $sessions; do
   if [[ "$s" == "$current_session" ]]; then
     output+="#[fg=$bg_main,bg=$bg_selected]$left_seperator#[fg=$fg_selected,bg=$bg_selected,bold] $s #[fg=$bg_selected,bg=$bg_main]$left_seperator"
+    prev_is_active=true
   else
+    if [[ "$is_first" == false && "$prev_is_active" == false ]]; then
+      output+="#[fg=$text_main,bg=$bg_main]$left_separator_sub "
+    fi
     output+="#[fg=$text_main,bg=$bg_main] $s "
+    prev_is_active=false
   fi
+  is_first=false
 done
 
 echo "$output"
