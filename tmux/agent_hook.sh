@@ -73,7 +73,7 @@ if [[ -n "${TMUX:-}" ]]; then
   esac
 fi
 
-# Output valid hook JSON response protocol
+# Output valid hook JSON response protocol (only for agent lifecycle events)
 case "$event" in
   question|PreToolUse)
     echo '{"decision": "allow"}'
@@ -81,7 +81,10 @@ case "$event" in
   done|Stop)
     echo '{"decision": "stop"}'
     ;;
-  *)
+  tool_done|PostToolUse|clear|PreInvocation)
     echo '{}'
+    ;;
+  *)
+    # Internal tmux events (focus_pane, bell, etc.) - silent
     ;;
 esac
