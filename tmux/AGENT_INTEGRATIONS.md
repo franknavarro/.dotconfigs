@@ -4,26 +4,30 @@ A unified, real-time visual notification system for Tmux that tracks the executi
 
 ---
 
-## 1. Visual Indicators & Icon Hierarchy
+## 1. Visual Indicators & Multi-Level Hierarchy
 
-The system displays a single visual indicator with strict precedence on the **left side** of both **Session Tabs (Line 0)** and **Window Tabs (Line 1)**:
+The system displays a single visual indicator with strict precedence across all three structural levels (**Session Tabs Line 0**, **Window Tabs Line 1**, and **Pane Borders**):
 
 | Precedence | Icon | State | Meaning | Clearing Behavior |
 | :---: | :---: | :--- | :--- | :--- |
-| **1 (Highest)** | **`❓`** | `question` | **Interactive Prompt / Approval**: Agent is waiting for user confirmation, permission grant, or clarification answer. | **Persistent**: Does **not** clear when navigating between windows. Only clears when the user actually responds and tool execution completes. |
-| **2** | **`🤖`** | `done` | **Turn Complete**: Agent finished processing the prompt/turn and is waiting at the standard user prompt. | **Focus-Clearing**: Clears automatically as soon as the user focuses/navigates to the window or pane. |
-| **3** | **`🔔`** | `bell` | **Application Bell**: Standard terminal BEL character (`\a` / `0x07`). | Clears natively upon window focus. |
-| **4 (Lowest)** | **`❗`** | `alert` | **Background Alerts / Silence**: Window alerts / silence monitoring triggers. | Clears natively upon window focus. |
+| **1 (Highest)** | **`❓`** | `question` | **Interactive Prompt / Approval**: Agent is waiting for user confirmation, permission grant, or clarification answer. | **Persistent**: Does **not** clear when navigating between panes or windows. Only clears when the user actually responds and tool execution completes. |
+| **2** | **`🤖`** | `done` | **Turn Complete**: Agent finished processing the prompt/turn and is waiting at the standard user prompt. | **Pane-Focus Clearing**: Clears automatically as soon as the user focuses/navigates specifically into that **pane**. |
+| **3** | **`🔔`** | `bell` | **Application Bell**: Standard terminal BEL character (`\a` / `0x07`). | **Pane-Focus Clearing**: Clears as soon as that **pane** becomes active. |
+| **4 (Lowest)** | **`❗`** | `alert` | **Background Alerts / Silence**: Window alerts / silence monitoring triggers. | Clears upon window focus. |
 
-### Visual Layout Examples
+### Visual Layout Hierarchy
 
-- **Line 0 (Sessions Bar)**:
+- **Line 0 (Sessions Bar)**: Displays the highest-precedence indicator among all windows and panes in that session:
   ```
   ❒ SESSIONS  dev  reviewer  ❓ api-refactor  🤖 workspace 
   ```
-- **Line 1 (Windows Bar)**:
+- **Line 1 (Windows Bar)**: Displays the highest-precedence indicator among all panes within that window:
   ```
   ❐ WINDOWS  1 editor  ❓ 2 agent  🤖 3 build 
+  ```
+- **Pane Borders (`top`)**: Displays the specific status icon of each inactive pane in its top border:
+  ```
+  ┌── 🤖 2: python [~/projects/my-app/src] ──────────────────────────────┐
   ```
 
 ---
@@ -33,9 +37,9 @@ The system displays a single visual indicator with strict precedence on the **le
 ```
 ~/.dotconfigs/
 ├── tmux/
-│   ├── tmux.conf             # Window format (Line 1) and conditional focus hooks
+│   ├── tmux.conf             # Window format (Line 1), pane border formats, and focus hooks
 │   ├── session_tabs.sh       # Multi-session aggregator and renderer (Line 0)
-│   ├── agent_hook.sh         # Universal lifecycle hook event handler
+│   ├── agent_hook.sh         # Pane-aware lifecycle hook event handler & window synchronizer
 │   └── AGENT_INTEGRATIONS.md # This documentation
 └── ~/.gemini/config/
     └── hooks.json            # Agent lifecycle hook configuration
@@ -43,23 +47,25 @@ The system displays a single visual indicator with strict precedence on the **le
 
 ### Component Roles
 
-1. **Tmux Window Option (`@agent_waiting`)**:
-   - Stored per-window: `question`, `done`, or `0` (cleared).
-   - Read by both `session_tabs.sh` (Line 0) and `tmux.conf` (Line 1).
+1. **Tmux Options**:
+   - Pane Option (`@agent_waiting`, `@pane_bell`): Tracked per-pane.
+   - Window Option (`@agent_waiting`, `@window_bell`): Computed automatically by `sync_window` aggregating all panes in that window.
+   - Read by `session_tabs.sh` (Line 0), `tmux.conf` window status (Line 1), and `pane-border-format` (Pane level).
 
 2. **`agent_hook.sh`**:
-   - Receives lifecycle event triggers from CLI tools via CLI arguments (`question`, `tool_done`, `done`, `clear`) or standard hook JSON payloads on `stdin`.
-   - Identifies the target tmux pane/window using the `$TMUX_PANE` environment variable, ensuring accurate background updates even when the user is working in another session/window.
+   - Receives lifecycle event triggers from CLI tools targeting the pane identified by `$TMUX_PANE` or explicit argument `#{pane_id}`.
+   - Automatically synchronizes pane states to the parent window via `sync_window`.
    - Outputs valid JSON conforming to agent hook protocols (e.g. `{"decision": "allow"}` for `PreToolUse`, `{}` for `PostToolUse`).
 
-3. **Conditional Focus Hooks (`tmux.conf`)**:
-   - `after-select-window` and `pane-focus-in` hooks evaluate `@agent_waiting`:
+3. **Pane-Level Focus & Alert Hooks (`tmux.conf`)**:
+   - `pane-focus-in`, `after-select-pane`, `after-select-window`:
      ```tmux
-     set-hook -g after-select-window 'if-shell -F "#{||:#{==:#{@agent_waiting},done},#{==:#{@agent_waiting},1}}" "set-option -w @agent_waiting 0"'
-     set-hook -g pane-focus-in 'if-shell -F "#{||:#{==:#{@agent_waiting},done},#{==:#{@agent_waiting},1}}" "set-option -w @agent_waiting 0"'
+     set-hook -g pane-focus-in 'run-shell -b "~/.dotconfigs/tmux/agent_hook.sh focus_pane #{pane_id}"'
+     set-hook -g after-select-pane 'run-shell -b "~/.dotconfigs/tmux/agent_hook.sh focus_pane #{pane_id}"'
+     set-hook -g after-select-window 'run-shell -b "~/.dotconfigs/tmux/agent_hook.sh focus_pane #{pane_id}"'
+     set-hook -g alert-bell 'run-shell -b "~/.dotconfigs/tmux/agent_hook.sh bell #{pane_id}"'
      ```
-   - Only resets `@agent_waiting` when the value is `done` (or legacy `1`).
-   - If `@agent_waiting` is `question`, it remains intact until explicit completion.
+   - When a specific pane receives focus, only that pane's `done` (`🤖`) and bell (`🔔`) are cleared, preserving active states on other panes and keeping `question` (`❓`) active until tool completion.
 
 ---
 
