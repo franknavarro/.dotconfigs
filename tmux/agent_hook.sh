@@ -26,47 +26,47 @@ sync_window() {
     if [[ "$p_bell" == "1" ]]; then
       w_bell="1"
     fi
-  done < <(tmux list-panes -t "$w_id" -F '#{@agent_waiting}:#{@pane_bell}' 2>/dev/null)
+  done < <(tmux list-panes -t "$w_id" -F '#{@p_agent}:#{@p_bell}' 2>/dev/null)
 
-  tmux set-option -w -t "$w_id" @agent_waiting "$w_status" 2>/dev/null
-  tmux set-option -w -t "$w_id" @window_bell "$w_bell" 2>/dev/null
+  tmux set-option -w -t "$w_id" @w_agent "$w_status" 2>/dev/null
+  tmux set-option -w -t "$w_id" @w_bell "$w_bell" 2>/dev/null
 }
 
 if [[ -n "${TMUX:-}" ]]; then
   case "$event" in
     question|PreToolUse)
-      tmux set-option -p "${target[@]}" @agent_waiting question 2>/dev/null
+      tmux set-option -p "${target[@]}" @p_agent question 2>/dev/null
       sync_window
       ;;
     tool_done|PostToolUse)
-      tmux set-option -p "${target[@]}" @agent_waiting 0 2>/dev/null
+      tmux set-option -p "${target[@]}" @p_agent 0 2>/dev/null
       sync_window
       ;;
     done|Stop)
       is_active="$(tmux display-message "${target[@]}" -p '#{?#{&&:#{pane_active},#{&&:#{window_active},#{session_attached}}},1,0}' 2>/dev/null)"
       if [[ "$is_active" == "0" ]]; then
-        tmux set-option -p "${target[@]}" @agent_waiting done 2>/dev/null
+        tmux set-option -p "${target[@]}" @p_agent done 2>/dev/null
       else
-        tmux set-option -p "${target[@]}" @agent_waiting 0 2>/dev/null
+        tmux set-option -p "${target[@]}" @p_agent 0 2>/dev/null
       fi
       sync_window
       ;;
     clear|PreInvocation)
-      tmux set-option -p "${target[@]}" @agent_waiting 0 2>/dev/null
+      tmux set-option -p "${target[@]}" @p_agent 0 2>/dev/null
       sync_window
       ;;
     focus_pane)
-      tmux set-option -p "${target[@]}" @pane_bell 0 2>/dev/null
-      cur_agent="$(tmux display-message "${target[@]}" -p '#{@agent_waiting}' 2>/dev/null)"
+      tmux set-option -p "${target[@]}" @p_bell 0 2>/dev/null
+      cur_agent="$(tmux display-message "${target[@]}" -p '#{@p_agent}' 2>/dev/null)"
       if [[ "$cur_agent" == "done" || "$cur_agent" == "1" ]]; then
-        tmux set-option -p "${target[@]}" @agent_waiting 0 2>/dev/null
+        tmux set-option -p "${target[@]}" @p_agent 0 2>/dev/null
       fi
       sync_window
       ;;
     bell)
       is_active="$(tmux display-message "${target[@]}" -p '#{?#{&&:#{pane_active},#{&&:#{window_active},#{session_attached}}},1,0}' 2>/dev/null)"
       if [[ "$is_active" == "0" ]]; then
-        tmux set-option -p "${target[@]}" @pane_bell 1 2>/dev/null
+        tmux set-option -p "${target[@]}" @p_bell 1 2>/dev/null
         sync_window
       fi
       ;;

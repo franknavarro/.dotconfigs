@@ -25,7 +25,7 @@ while IFS=":" read -r s_name s_agent s_pbell s_wbell s_alerts; do
   elif [[ -n "$s_alerts" && "$cur" != "question" && "$cur" != "done" && "$cur" != "bell" ]]; then
     session_status["$s_name"]="alert"
   fi
-done < <(tmux list-panes -a -F "#{session_name}:#{@agent_waiting}:#{@pane_bell}:#{window_bell_flag}:#{window_alerts}" 2>/dev/null)
+done < <(tmux list-panes -a -F "#{session_name}:#{@p_agent}:#{@p_bell}:#{window_bell_flag}:#{window_alerts}" 2>/dev/null)
 
 bg_main="#44475a"
 

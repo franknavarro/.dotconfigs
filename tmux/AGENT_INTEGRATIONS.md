@@ -48,9 +48,9 @@ The system displays a single visual indicator with strict precedence across all 
 ### Component Roles
 
 1. **Tmux Options**:
-   - Pane Option (`@agent_waiting`, `@pane_bell`): Tracked per-pane.
-   - Window Option (`@agent_waiting`, `@window_bell`): Computed automatically by `sync_window` aggregating all panes in that window.
-   - Read by `session_tabs.sh` (Line 0), `tmux.conf` window status (Line 1), and `pane-border-format` (Pane level).
+   - Pane Option (`@p_agent`, `@p_bell`): Tracked per-pane. Evaluated in `pane-border-format`.
+   - Window Option (`@w_agent`, `@w_bell`): Computed automatically by `sync_window` aggregating all panes in that window. Evaluated in `window-status-current-format` and `window-status-format` (Line 1).
+   - Session Level: Aggregated across all panes in all windows by `session_tabs.sh` (Line 0).
 
 2. **`agent_hook.sh`**:
    - Receives lifecycle event triggers from CLI tools targeting the pane identified by `$TMUX_PANE` or explicit argument `#{pane_id}`.
