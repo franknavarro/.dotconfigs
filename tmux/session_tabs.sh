@@ -49,6 +49,7 @@ output="#[fg=$fg_header,bg=$bg_header,bold] ❒ SESSIONS #[fg=$bg_header,bg=$bg_
 
 prev_is_active=false
 is_first=true
+idx=0
 
 for s in $sessions; do
   flags=""
@@ -60,16 +61,17 @@ for s in $sessions; do
   esac
 
   if [[ "$s" == "$current_session" ]]; then
-    output+="#[fg=$bg_main,bg=$bg_selected]$left_seperator#[fg=$fg_selected,bg=$bg_selected,bold] ${flags}$s #[fg=$bg_selected,bg=$bg_main]$left_seperator"
+    output+="#[fg=$bg_main,bg=$bg_selected]$left_seperator#[fg=$fg_selected,bg=$bg_selected,bold] ${flags}${idx} $s #[fg=$bg_selected,bg=$bg_main]$left_seperator"
     prev_is_active=true
   else
     if [[ "$is_first" == false && "$prev_is_active" == false ]]; then
       output+="#[fg=$text_main,bg=$bg_main]$left_separator_sub "
     fi
-    output+="#[fg=$text_main,bg=$bg_main] ${flags}$s "
+    output+="#[fg=$text_main,bg=$bg_main] ${flags}${idx} $s "
     prev_is_active=false
   fi
   is_first=false
+  ((idx++))
 done
 
 echo "$output"
