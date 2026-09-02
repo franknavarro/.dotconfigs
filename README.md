@@ -19,6 +19,8 @@ A modular, cross-platform collection of dotfiles, shell configurations, and deve
 │   ├── tmux.conf              # Master tmux configuration (2-line status bar)
 │   ├── session_tabs.sh        # Dynamic session tab renderer
 │   ├── top_right_info.sh      # Modular powerline statusbar widget engine
+│   ├── agent_hook.sh          # Universal agent lifecycle hook handler
+│   ├── AGENT_INTEGRATIONS.md  # Agent CLI status integration guide & protocol
 │   └── extension.sh           # (Untracked) Machine-specific statusbar bridge
 └── install.sh                 # Dotfiles installer and symlink orchestrator
 ```
@@ -31,6 +33,10 @@ A modular, cross-platform collection of dotfiles, shell configurations, and deve
 - **Two-Line Status Bar**:
   - **Line 0 (Top)**: Active and background Tmux sessions with powerline styling (`session_tabs.sh`).
   - **Line 1 (Bottom)**: Active session windows and pane tabs.
+- **Agent CLI Status & Notification System**:
+  - Real-time icon indicators positioned on the left side of session and window labels (`❓` interactive prompt > `🤖` turn finished > `🔔` bell > `❗` alert).
+  - Persistent prompt awareness: `❓` stays visible until user responds even when navigating between windows.
+  - See [Agent Integrations Guide](tmux/AGENT_INTEGRATIONS.md) for full protocol and how to integrate any CLI agent.
 - **Top-Right Statusline Widgets (`top_right_info.sh`)**:
   - Modular, high-contrast Powerline status pills: `[custom extension]  [uptime]  [ram]  [cpu]  [disk]`.
   - Machine-specific indicators dynamically loaded via an untracked `extension.sh`.

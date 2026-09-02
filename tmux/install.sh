@@ -14,5 +14,6 @@ command -v tmux >/dev/null || {
 
 chmod +x $DOTFILES/tmux/session_tabs.sh
 chmod +x $DOTFILES/tmux/top_right_info.sh
+chmod +x $DOTFILES/tmux/agent_hook.sh
 ln -s -f $DOTFILES/tmux/tmux.conf $HOME/.tmux.conf
 
