@@ -1,7 +1,7 @@
 command -v rg || {
   case "$MACHINE_NAME" in
     Linux*)
-      RIPGREP_PATH=$HOME/ripgrep.deb
+      RIPGREP_PATH=$DOTFILES_TMP/ripgrep.deb
       curl -L https://github.com/BurntSushi/ripgrep/releases/download/11.0.2/ripgrep_11.0.2_amd64.deb -o $RIPGREP_PATH && \
       sudo dpkg -i $RIPGREP_PATH && \
       rm -f $RIPGREP_PATH

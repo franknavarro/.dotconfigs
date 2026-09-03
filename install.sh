@@ -161,6 +161,12 @@ for except in "${except_list[@]}"; do
 done
 
 export DOTFILES=$(pwd)
+export DOTFILES_TMP=$(mktemp -d)
+cleanup() {
+  [ -n "$DOTFILES_TMP" ] && rm -rf "$DOTFILES_TMP"
+}
+trap cleanup EXIT
+
 export PROFILE="$(nvm_detect_profile)"
 echo $PROFILE
 
