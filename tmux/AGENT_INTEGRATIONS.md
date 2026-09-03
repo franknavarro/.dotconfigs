@@ -95,7 +95,7 @@ Configure your hook manifest (e.g. `~/.gemini/config/hooks.json` or agent config
     ],
     "PostToolUse": [
       {
-        "matcher": "ask_.*",
+        "matcher": ".*",
         "hooks": [
           {
             "type": "command",

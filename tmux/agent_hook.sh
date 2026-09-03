@@ -66,7 +66,7 @@ if [[ -n "${TMUX:-}" ]]; then
     bell)
       is_active="$(tmux display-message "${target[@]}" -p '#{?#{&&:#{pane_active},#{&&:#{window_active},#{session_attached}}},1,0}' 2>/dev/null)"
       if [[ "$is_active" == "0" ]]; then
-        tmux set-option -p "${target[@]}" @p_bell 1 2>/dev/null
+        tmux set-option -p "${target[@]}" @p_agent question 2>/dev/null
         sync_window
       fi
       ;;
