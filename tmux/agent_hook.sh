@@ -36,12 +36,10 @@ if [[ -n "${TMUX:-}" ]]; then
   case "$event" in
     question|PreToolUse)
       tmux set-option -p "${target[@]}" @p_agent question 2>/dev/null
-      tmux set-option -p "${target[@]}" @p_stopped 0 2>/dev/null
       sync_window
       ;;
     tool_done|PostToolUse)
       tmux set-option -p "${target[@]}" @p_agent 0 2>/dev/null
-      tmux set-option -p "${target[@]}" @p_stopped 0 2>/dev/null
       sync_window
       ;;
     done|Stop)
@@ -50,13 +48,11 @@ if [[ -n "${TMUX:-}" ]]; then
         tmux set-option -p "${target[@]}" @p_agent done 2>/dev/null
       else
         tmux set-option -p "${target[@]}" @p_agent 0 2>/dev/null
-        tmux set-option -p "${target[@]}" @p_stopped 1 2>/dev/null
       fi
       sync_window
       ;;
     clear|PreInvocation)
       tmux set-option -p "${target[@]}" @p_agent 0 2>/dev/null
-      tmux set-option -p "${target[@]}" @p_stopped 0 2>/dev/null
       sync_window
       ;;
     focus_pane)
@@ -66,16 +62,6 @@ if [[ -n "${TMUX:-}" ]]; then
         tmux set-option -p "${target[@]}" @p_agent 0 2>/dev/null
       fi
       sync_window
-      ;;
-    bell)
-      cur_agent="$(tmux display-message "${target[@]}" -p '#{@p_agent}' 2>/dev/null)"
-      cur_stopped="$(tmux display-message "${target[@]}" -p '#{@p_stopped}' 2>/dev/null)"
-      if [[ "$cur_stopped" == "1" ]]; then
-        tmux set-option -p "${target[@]}" @p_stopped 0 2>/dev/null
-      elif [[ "$cur_agent" != "done" && "$cur_agent" != "1" ]]; then
-        tmux set-option -p "${target[@]}" @p_agent question 2>/dev/null
-        sync_window
-      fi
       ;;
   esac
 fi
