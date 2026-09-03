@@ -84,7 +84,7 @@ Configure your hook manifest (e.g. `~/.gemini/config/hooks.json` or agent config
   "agent-tmux-status": {
     "PreToolUse": [
       {
-        "matcher": ".*",
+        "matcher": "ask_.*",
         "hooks": [
           {
             "type": "command",
@@ -95,7 +95,7 @@ Configure your hook manifest (e.g. `~/.gemini/config/hooks.json` or agent config
     ],
     "PostToolUse": [
       {
-        "matcher": ".*",
+        "matcher": "ask_.*",
         "hooks": [
           {
             "type": "command",
