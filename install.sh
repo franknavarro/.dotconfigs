@@ -72,7 +72,7 @@ install_dotconfigs_help() {
 EXCEPT_LIST=""
 ONLY_LIST=""
 
-BREW_INSTALL=false
+BREW_INSTALL=true
 GIT_INSTALL=true
 LS_COLORS_INSTALL=true
 NEOVIM_INSTALL=true
@@ -110,7 +110,7 @@ for arg in "$@"; do
       LS_COLORS_INSTALL=false
       RIPGREP_INSTALL=false
       PYTHON_INSTALL=false
-      PACKAGES_INSTALL=false
+      PACKAGE_INSTALL=false
       ONLY_LIST=$(echo "$arg" | sed -e 's/^[^= ]*[= ]\?//g')
       shift
       if [[ -z "$ONLY_LIST" ]]; then
@@ -131,12 +131,12 @@ IFS=, read -r -a except_list <<< "$EXCEPT_LIST"
 for only in "${only_list[@]}"; do
   only="${only,,}"
   case $only in
-    brew|homebrew) BREW_INSTALL=true ;;
+    brew|homebrew) BREW_INSTALL=true; PACKAGE_INSTALL=true ;;
     git) GIT_INSTALL=true ;;
     ls_colors) LS_COLORS_INSTALL=true ;;
     neovim|nvim) NEOVIM_INSTALL=true ;;
     node) NODE_INSTALL=true ;;
-    packages) PACKAGE_INSTALL=true ;;
+    packages|package) PACKAGE_INSTALL=true; BREW_INSTALL=true ;;
     python) PYTHON_INSTALL=true ;;
     ripgrep) RIPGREP_INSTALL=true ;;
     ruby) RUBY_INSTALL=true ;;
@@ -148,11 +148,11 @@ for except in "${except_list[@]}"; do
   except="${except,,}"
   case $except in
     git) GIT_INSTALL=false ;;
-    homebrew|brew) BREW_INSTALL=false ;;
+    homebrew|brew) BREW_INSTALL=false; PACKAGE_INSTALL=false ;;
     ls_colors) LS_COLORS_INSTALL=false ;;
     neovim|nvim) NEOVIM_INSTALL=false ;;
     node) NODE_INSTALL=false ;;
-    packages) PACKAGE_INSTALL=true ;;
+    packages|package) PACKAGE_INSTALL=false; BREW_INSTALL=false ;;
     python) PYTHON_INSTALL=false ;;
     ripgrep) RIPGREP_INSTALL=false ;;
     ruby) RUBY_INSTALL=false ;;
@@ -173,15 +173,17 @@ export MACHINE_NAME=$(uname -s)
 
 case "$MACHINE_NAME" in
   Linux*)
-    echo 'INSTALLING LINUX PACKAGES'
-    LINUX_PACKAGES=$DOTFILES/packages/$PACKAGE_FILE
-    sudo apt-get clean && sudo apt-get update;
-    xargs sudo apt-get install -y <$LINUX_PACKAGES
+    if [ "$PACKAGE_INSTALL" = true ] ; then
+      echo 'INSTALLING LINUX PACKAGES'
+      LINUX_PACKAGES=$DOTFILES/packages/$PACKAGE_FILE
+      sudo apt-get clean && sudo apt-get update;
+      xargs sudo apt-get install -y <$LINUX_PACKAGES
+    fi
   ;;
   Darwin*)
-    if [ "$BREW_INSTALL" = true ] ; then
+    if [ "$BREW_INSTALL" = true ] || [ "$PACKAGE_INSTALL" = true ] ; then
       echo 'INSTALLING HOMEBREW'
-      bash $DOTFILES/brew/install.sh
+      . $DOTFILES/brew/install.sh
 
       echo 'INSTALLING HOMEBREW PACKAGES'
       BREW_PACKAGES=$DOTFILES/packages/$BREW_PACKAGE_FILE
