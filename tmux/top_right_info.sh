@@ -35,20 +35,30 @@ fi
 
 # 3. RAM usage (Dracula Purple background)
 if command -v free >/dev/null 2>&1; then
-  ram_str="$(free -h 2>/dev/null | awk '/Mem:/ {print $3 "/" $2}')"
-  [[ -n "$ram_str" ]] && blocks+=("#bd93f9:#000000: $ram_str")
+  ram_used=$(free -h 2>/dev/null | awk '/Mem:/ {print $3}' | sed 's/Gi//')
+  ram_tot=$(free -h 2>/dev/null | awk '/Mem:/ {print $2}')
+  ram_pct=$(free -m 2>/dev/null | awk '/Mem:/ {if ($2 > 0) printf "%.0f", ($3 / $2) * 100}')
+  if [[ -n "$ram_used" && -n "$ram_tot" ]]; then
+    blocks+=("#bd93f9:#000000:󰍛 ${ram_used}/${ram_tot} (${ram_pct}%)")
+  fi
 fi
 
 # 4. CPU Load (Dracula Yellow background)
 if [[ -r /proc/loadavg ]]; then
-  cpu_str="$(awk '{print $1, $2}' /proc/loadavg 2>/dev/null)"
-  [[ -n "$cpu_str" ]] && blocks+=("#f1fa8c:#000000:⚙ $cpu_str")
+  load1=$(awk '{printf "%.1f", $1}' /proc/loadavg 2>/dev/null)
+  ncpus=$(nproc 2>/dev/null || echo 1)
+  cpu_pct=$(awk "BEGIN {printf \"%.0f\", ($load1 / $ncpus) * 100}")
+  blocks+=("#f1fa8c:#000000: ${load1}/${ncpus}C (${cpu_pct}%)")
 fi
 
 # 5. Disk usage (Dracula Orange background)
 if command -v df >/dev/null 2>&1; then
-  disk_str="$(df -h "$HOME" 2>/dev/null | awk 'NR==2 {print $5}')"
-  [[ -n "$disk_str" ]] && blocks+=("#ffb86c:#000000: $disk_str")
+  disk_used=$(df -h "$HOME" 2>/dev/null | awk 'NR==2 {print $3}' | sed 's/G$//')
+  disk_tot=$(df -h "$HOME" 2>/dev/null | awk 'NR==2 {print $2}')
+  disk_pct=$(df -h "$HOME" 2>/dev/null | awk 'NR==2 {print $5}')
+  if [[ -n "$disk_used" && -n "$disk_tot" ]]; then
+    blocks+=("#ffb86c:#000000:󰋊 ${disk_used}/${disk_tot} (${disk_pct})")
+  fi
 fi
 
 # Construct chained powerline blocks matching bottom status line
