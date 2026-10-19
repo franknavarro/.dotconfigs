@@ -55,6 +55,7 @@ A modular, cross-platform collection of dotfiles, shell configurations, and deve
 Both Tmux and Neovim support local, untracked extension hooks so you can keep company or workstation-specific tools out of public repositories:
 
 - **Tmux**: Create `~/.dotconfigs/tmux/extension.sh` (already gitignored) to output local status widgets.
+- **Tmux**: Create `~/.dotconfigs/tmux/local.conf` (already gitignored) for machine-specific key bindings and option overrides; it is sourced by `tmux.conf` when present.
 - **Neovim**: Create `~/.config/nvim/lua/local-config.lua` (already gitignored) to register local plugins and lifecycle hooks.
 
 ---

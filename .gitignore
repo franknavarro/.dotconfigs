@@ -1,3 +1,5 @@
 *.sw[a-z]
 tmux/extension.sh
 extension.sh
+tmux/local.conf
+tmux-*.log
