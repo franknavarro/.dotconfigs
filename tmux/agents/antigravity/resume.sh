@@ -1,9 +1,9 @@
 #!/bin/bash
-# antigravity_resume.sh - tmux-resurrect restore command for Antigravity CLI panes: resume the
-# conversation this pane held at the last save (see antigravity_sessions_save.sh), else start
+# resume.sh - tmux-resurrect restore command for Antigravity CLI panes: resume the
+# conversation this pane held at the last save (see sessions_save.sh), else start
 # a new one.
 #
-# Usage: antigravity_resume.sh [command [app_data_dir]]
+# Usage: resume.sh [command [app_data_dir]]
 #   command       CLI to launch (default: agy)
 #   app_data_dir  where the CLI keeps conversations (<app_data_dir>/brain/<id>), used to skip
 #                 conversations that were deleted (default: ~/.gemini/antigravity-cli; the

@@ -1,6 +1,6 @@
 #!/bin/bash
-# antigravity_session_hook.sh - Antigravity CLI SessionStart/PreInvocation hook: tag the tmux
-# pane with the conversation ID (@antigravity_session) so antigravity_sessions_save.sh can
+# session_hook.sh - Antigravity CLI SessionStart/PreInvocation hook: tag the tmux
+# pane with the conversation ID (@antigravity_session) so sessions_save.sh can
 # record it for resurrect. PreInvocation keeps the tag current after /resume or /fork.
 
 payload="$(cat)"

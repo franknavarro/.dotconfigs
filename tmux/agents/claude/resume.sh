@@ -1,6 +1,6 @@
 #!/bin/bash
-# claude_resume.sh - tmux-resurrect restore command for Claude panes: resume the session
-# this pane held at the last save (see claude_sessions_save.sh), else start a new one.
+# resume.sh - tmux-resurrect restore command for Claude panes: resume the session
+# this pane held at the last save (see sessions_save.sh), else start a new one.
 
 map="${XDG_DATA_HOME:-$HOME/.local/share}/tmux/claude_sessions.tsv"
 pos="$(tmux display-message -t "$TMUX_PANE" -p $'#{session_name}\t#{window_index}\t#{pane_index}')"

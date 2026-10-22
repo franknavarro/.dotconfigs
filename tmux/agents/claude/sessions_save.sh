@@ -1,6 +1,6 @@
 #!/bin/bash
-# claude_sessions_save.sh - tmux-resurrect post-save-all hook: snapshot which pane
-# position (session, window, pane) holds which Claude session, for claude_resume.sh.
+# sessions_save.sh - tmux-resurrect post-save-all hook: snapshot which pane
+# position (session, window, pane) holds which Claude session, for resume.sh.
 
 map="${XDG_DATA_HOME:-$HOME/.local/share}/tmux/claude_sessions.tsv"
 mkdir -p "${map%/*}"

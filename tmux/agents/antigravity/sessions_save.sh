@@ -1,7 +1,7 @@
 #!/bin/bash
-# antigravity_sessions_save.sh - tmux-resurrect post-save-all hook: snapshot which pane
+# sessions_save.sh - tmux-resurrect post-save-all hook: snapshot which pane
 # position (session, window, pane) holds which Antigravity CLI conversation, for
-# antigravity_resume.sh.
+# resume.sh.
 
 map="${XDG_DATA_HOME:-$HOME/.local/share}/tmux/antigravity_sessions.tsv"
 mkdir -p "${map%/*}"

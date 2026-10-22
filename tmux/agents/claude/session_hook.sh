@@ -1,6 +1,6 @@
 #!/bin/bash
-# claude_session_hook.sh - Claude Code SessionStart hook: tag the tmux pane with the
-# session ID (@claude_session) so claude_sessions_save.sh can record it for resurrect.
+# session_hook.sh - Claude Code SessionStart hook: tag the tmux pane with the
+# session ID (@claude_session) so sessions_save.sh can record it for resurrect.
 
 [[ -z "${TMUX_PANE:-}" ]] && exit 0
 session_id="$(jq -r '.session_id // empty')"

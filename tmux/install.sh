@@ -14,13 +14,13 @@ command -v tmux >/dev/null || {
 
 chmod +x $DOTFILES/tmux/session_tabs.sh
 chmod +x $DOTFILES/tmux/top_right_info.sh
-chmod +x $DOTFILES/tmux/agent_hook.sh
-chmod +x $DOTFILES/tmux/claude_session_hook.sh
-chmod +x $DOTFILES/tmux/claude_sessions_save.sh
-chmod +x $DOTFILES/tmux/claude_resume.sh
-chmod +x $DOTFILES/tmux/antigravity_session_hook.sh
-chmod +x $DOTFILES/tmux/antigravity_sessions_save.sh
-chmod +x $DOTFILES/tmux/antigravity_resume.sh
+chmod +x $DOTFILES/tmux/agents/agent_hook.sh
+chmod +x $DOTFILES/tmux/agents/claude/session_hook.sh
+chmod +x $DOTFILES/tmux/agents/claude/sessions_save.sh
+chmod +x $DOTFILES/tmux/agents/claude/resume.sh
+chmod +x $DOTFILES/tmux/agents/antigravity/session_hook.sh
+chmod +x $DOTFILES/tmux/agents/antigravity/sessions_save.sh
+chmod +x $DOTFILES/tmux/agents/antigravity/resume.sh
 ln -s -f $DOTFILES/tmux/tmux.conf $HOME/.tmux.conf
 
 # Plugins (tmux-resurrect, tmux-continuum) via TPM; runs without a tmux server
@@ -31,22 +31,26 @@ $HOME/.tmux/plugins/tpm/bin/install_plugins
 # Claude Code SessionStart hook that tags panes with their session ID, so
 # tmux-resurrect can resume each Claude pane's own session after a reboot
 CLAUDE_SETTINGS=${CLAUDE_CONFIG_DIR:-$HOME/.claude}/settings.json
-CLAUDE_HOOK=$DOTFILES/tmux/claude_session_hook.sh
+CLAUDE_HOOK=$DOTFILES/tmux/agents/claude/session_hook.sh
 if ! command -v jq >/dev/null; then
 	echo "jq not found: add $CLAUDE_HOOK as a SessionStart hook in $CLAUDE_SETTINGS manually"
 else
 	mkdir -p "$(dirname $CLAUDE_SETTINGS)"
 	[ -s $CLAUDE_SETTINGS ] || echo '{}' >$CLAUDE_SETTINGS
-	if ! jq -e --arg cmd "$CLAUDE_HOOK" 'any(.hooks.SessionStart[]?.hooks[]?; .command == $cmd)' $CLAUDE_SETTINGS >/dev/null; then
-		jq --arg cmd "$CLAUDE_HOOK" '.hooks.SessionStart += [{"hooks": [{"type": "command", "command": $cmd}]}]' $CLAUDE_SETTINGS >$CLAUDE_SETTINGS.tmp &&
-			mv $CLAUDE_SETTINGS.tmp $CLAUDE_SETTINGS
-	fi
+	# Drop the hook's pre-agents/ path, then add the current one if missing
+	CLAUDE_HOOK_OLD=$DOTFILES/tmux/claude_session_hook.sh
+	jq --arg cmd "$CLAUDE_HOOK" --arg old "$CLAUDE_HOOK_OLD" '
+		.hooks.SessionStart = [(.hooks.SessionStart // [])[] | .hooks |= map(select(.command != $old)) | select(.hooks != [])]
+		| if any(.hooks.SessionStart[].hooks[]?; .command == $cmd) then .
+		  else .hooks.SessionStart += [{"hooks": [{"type": "command", "command": $cmd}]}] end
+	' $CLAUDE_SETTINGS >$CLAUDE_SETTINGS.tmp &&
+		mv $CLAUDE_SETTINGS.tmp $CLAUDE_SETTINGS
 fi
 
 # Antigravity CLI SessionStart/PreInvocation hooks that tag panes with their conversation
 # ID, so tmux-resurrect can resume each agy pane's own conversation after a reboot
 AGY_HOOKS=${AGY_HOOKS:-$HOME/.gemini/config/hooks.json}
-AGY_HOOK=$DOTFILES/tmux/antigravity_session_hook.sh
+AGY_HOOK=$DOTFILES/tmux/agents/antigravity/session_hook.sh
 if ! command -v jq >/dev/null; then
 	echo "jq not found: add $AGY_HOOK as a SessionStart and PreInvocation hook in $AGY_HOOKS manually"
 else

@@ -19,8 +19,12 @@ A modular, cross-platform collection of dotfiles, shell configurations, and deve
 │   ├── tmux.conf              # Master tmux configuration (2-line status bar)
 │   ├── session_tabs.sh        # Dynamic session tab renderer
 │   ├── top_right_info.sh      # Modular powerline statusbar widget engine
-│   ├── agent_hook.sh          # Universal agent lifecycle hook handler
-│   ├── AGENT_INTEGRATIONS.md  # Agent CLI status integration guide & protocol
+│   ├── agents/                # Agent CLI integrations
+│   │   ├── agent_hook.sh          # Universal agent lifecycle hook handler
+│   │   ├── AGENT_INTEGRATIONS.md  # Agent CLI status integration guide & protocol
+│   │   ├── claude/                # Claude Code session persistence (resurrect)
+│   │   └── antigravity/           # Antigravity CLI session persistence (resurrect)
+│   ├── local.conf             # (Untracked) Machine-specific tmux overrides
 │   └── extension.sh           # (Untracked) Machine-specific statusbar bridge
 └── install.sh                 # Dotfiles installer and symlink orchestrator
 ```
@@ -36,10 +40,10 @@ A modular, cross-platform collection of dotfiles, shell configurations, and deve
 - **Agent CLI Status & Notification System**:
   - Real-time icon indicators positioned on the left side of session and window labels (`❓` interactive prompt > `🤖` turn finished > `🔔` bell > `❗` alert).
   - Persistent prompt awareness: `❓` stays visible until user responds even when navigating between windows.
-  - See [Agent Integrations Guide](tmux/AGENT_INTEGRATIONS.md) for full protocol and how to integrate any CLI agent.
+  - See [Agent Integrations Guide](tmux/agents/AGENT_INTEGRATIONS.md) for full protocol and how to integrate any CLI agent.
 - **Session Persistence (tmux-resurrect + tmux-continuum)**:
   - Auto-saves every 15 minutes and restores on server start (`prefix + C-s` / `prefix + C-r` manually).
-  - Agent panes come back resumed into their own conversation: Claude Code (`claude_*.sh`) and Antigravity CLI (`antigravity_*.sh`). A lifecycle hook tags each pane with its session ID, the post-save hook snapshots the pane → ID map, and the restore command relaunches with `--resume` / `--conversation`.
+  - Agent panes come back resumed into their own conversation: Claude Code (`agents/claude/`) and Antigravity CLI (`agents/antigravity/`). A lifecycle hook tags each pane with its session ID, the post-save hook snapshots the pane → ID map, and the restore command relaunches with `--resume` / `--conversation`.
 - **Top-Right Statusline Widgets (`top_right_info.sh`)**:
   - Modular, high-contrast Powerline status pills: `[custom extension]  [uptime]  [ram]  [cpu]  [disk]`.
   - Machine-specific indicators dynamically loaded via an untracked `extension.sh`.

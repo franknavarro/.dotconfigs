@@ -39,8 +39,10 @@ The system displays a single visual indicator with strict precedence across all 
 ├── tmux/
 │   ├── tmux.conf             # Window format (Line 1), pane border formats, and focus hooks
 │   ├── session_tabs.sh       # Multi-session aggregator and renderer (Line 0)
-│   ├── agent_hook.sh         # Pane-aware lifecycle hook event handler & window synchronizer
-│   └── AGENT_INTEGRATIONS.md # This documentation
+│   └── agents/
+│       ├── agent_hook.sh         # Pane-aware lifecycle hook event handler & window synchronizer
+│       ├── AGENT_INTEGRATIONS.md # This documentation
+│       └── <cli>/                # Per-CLI session persistence (claude/, antigravity/), see section 5
 └── ~/.gemini/config/
     └── hooks.json            # Agent lifecycle hook configuration
 ```
@@ -60,10 +62,10 @@ The system displays a single visual indicator with strict precedence across all 
 3. **Pane-Level Focus & Alert Hooks (`tmux.conf`)**:
    - `pane-focus-in`, `after-select-pane`, `after-select-window`:
      ```tmux
-     set-hook -g pane-focus-in 'run-shell -b "~/.dotconfigs/tmux/agent_hook.sh focus_pane #{pane_id}"'
-     set-hook -g after-select-pane 'run-shell -b "~/.dotconfigs/tmux/agent_hook.sh focus_pane #{pane_id}"'
-     set-hook -g after-select-window 'run-shell -b "~/.dotconfigs/tmux/agent_hook.sh focus_pane #{pane_id}"'
-     set-hook -g alert-bell 'run-shell -b "~/.dotconfigs/tmux/agent_hook.sh bell #{pane_id}"'
+     set-hook -g pane-focus-in 'run-shell -b "~/.dotconfigs/tmux/agents/agent_hook.sh focus_pane #{pane_id}"'
+     set-hook -g after-select-pane 'run-shell -b "~/.dotconfigs/tmux/agents/agent_hook.sh focus_pane #{pane_id}"'
+     set-hook -g after-select-window 'run-shell -b "~/.dotconfigs/tmux/agents/agent_hook.sh focus_pane #{pane_id}"'
+     set-hook -g alert-bell 'run-shell -b "~/.dotconfigs/tmux/agents/agent_hook.sh bell #{pane_id}"'
      ```
    - When a specific pane receives focus, only that pane's `done` (`🤖`) and bell (`🔔`) are cleared, preserving active states on other panes and keeping `question` (`❓`) active until tool completion.
 
@@ -88,7 +90,7 @@ Configure your hook manifest (e.g. `~/.gemini/config/hooks.json` or agent config
         "hooks": [
           {
             "type": "command",
-            "command": "~/.dotconfigs/tmux/agent_hook.sh question"
+            "command": "~/.dotconfigs/tmux/agents/agent_hook.sh question"
           }
         ]
       }
@@ -99,7 +101,7 @@ Configure your hook manifest (e.g. `~/.gemini/config/hooks.json` or agent config
         "hooks": [
           {
             "type": "command",
-            "command": "~/.dotconfigs/tmux/agent_hook.sh tool_done"
+            "command": "~/.dotconfigs/tmux/agents/agent_hook.sh tool_done"
           }
         ]
       }
@@ -107,13 +109,13 @@ Configure your hook manifest (e.g. `~/.gemini/config/hooks.json` or agent config
     "Stop": [
       {
         "type": "command",
-        "command": "~/.dotconfigs/tmux/agent_hook.sh done"
+        "command": "~/.dotconfigs/tmux/agents/agent_hook.sh done"
       }
     ],
     "PreInvocation": [
       {
         "type": "command",
-        "command": "~/.dotconfigs/tmux/agent_hook.sh clear"
+        "command": "~/.dotconfigs/tmux/agents/agent_hook.sh clear"
       }
     ]
   }
@@ -130,14 +132,14 @@ For CLI tools without native lifecycle hooks (e.g., Aider, Codex CLI, custom LLM
 # General wrapper for CLI agents
 run_agent() {
   # 1. Clear previous status when starting
-  ~/.dotconfigs/tmux/agent_hook.sh clear
+  ~/.dotconfigs/tmux/agents/agent_hook.sh clear
 
   # 2. Run the actual agent CLI
   "$@"
   local exit_code=$?
 
   # 3. Mark as done when the agent process exits
-  ~/.dotconfigs/tmux/agent_hook.sh done
+  ~/.dotconfigs/tmux/agents/agent_hook.sh done
 
   return $exit_code
 }
@@ -155,16 +157,16 @@ You can invoke `agent_hook.sh` directly from bash scripts, Makefile targets, or 
 
 ```bash
 # Mark window as waiting for interactive user response (shows ❓)
-~/.dotconfigs/tmux/agent_hook.sh question
+~/.dotconfigs/tmux/agents/agent_hook.sh question
 
 # Clear question state once user response / tool execution finishes
-~/.dotconfigs/tmux/agent_hook.sh tool_done
+~/.dotconfigs/tmux/agents/agent_hook.sh tool_done
 
 # Mark window as finished / turn complete (shows 🤖)
-~/.dotconfigs/tmux/agent_hook.sh done
+~/.dotconfigs/tmux/agents/agent_hook.sh done
 
 # Clear all status indicators
-~/.dotconfigs/tmux/agent_hook.sh clear
+~/.dotconfigs/tmux/agents/agent_hook.sh clear
 ```
 
 Alternatively, direct `tmux` commands:
@@ -201,7 +203,7 @@ def notify_agent_state(state: str):
   Args:
       state: "question", "tool_done", "done", or "clear"
   """
-  script = os.path.expanduser("~/.dotconfigs/tmux/agent_hook.sh")
+  script = os.path.expanduser("~/.dotconfigs/tmux/agents/agent_hook.sh")
   if os.path.exists(script) and os.environ.get("TMUX"):
     try:
       subprocess.run([script, state], timeout=2, capture_output=True)
@@ -225,7 +227,7 @@ import * as os from 'os';
 
 function notifyAgentState(state: 'question' | 'tool_done' | 'done' | 'clear'): void {
   if (!process.env.TMUX) return;
-  const scriptPath = path.join(os.homedir(), '.dotconfigs/tmux/agent_hook.sh');
+  const scriptPath = path.join(os.homedir(), '.dotconfigs/tmux/agents/agent_hook.sh');
   execFile(scriptPath, [state], { timeout: 2000 }, () => {});
 }
 ```
@@ -238,19 +240,41 @@ To test and verify the notification indicators:
 
 1. **Test `❓` (Question / Interactive Prompt)**:
    ```bash
-   bash ~/.dotconfigs/tmux/agent_hook.sh question <<< '{}'
+   bash ~/.dotconfigs/tmux/agents/agent_hook.sh question <<< '{}'
    # Observe '❓' in Line 0 and Line 1. Switch windows back and forth; '❓' will persist.
    ```
 
 2. **Test `tool_done` (Clearing Question)**:
    ```bash
-   bash ~/.dotconfigs/tmux/agent_hook.sh tool_done <<< '{}'
+   bash ~/.dotconfigs/tmux/agents/agent_hook.sh tool_done <<< '{}'
    # Observe '❓' disappears.
    ```
 
 3. **Test `🤖` (Turn Complete)**:
    ```bash
    # Switch to another window, then in the background run:
-   bash ~/.dotconfigs/tmux/agent_hook.sh done <<< '{}'
+   bash ~/.dotconfigs/tmux/agents/agent_hook.sh done <<< '{}'
    # Observe '🤖' on the inactive window. Switch to that window; '🤖' automatically clears.
    ```
+
+---
+
+## 5. Session Persistence (tmux-resurrect)
+
+tmux-resurrect + tmux-continuum save the tmux layout every 15 minutes and restore it when the tmux server starts. For agent CLIs, each `agents/<cli>/` directory makes restored panes resume the same conversation instead of coming back as plain shells:
+
+| Script | Role | Wired up in |
+| :--- | :--- | :--- |
+| `session_hook.sh` | Agent lifecycle hook: tags the pane with its session ID (`@claude_session` / `@antigravity_session`). Ignores nested agents started from inside the pane. | Claude Code `SessionStart` (`~/.claude/settings.json`); Antigravity CLI `SessionStart` + `PreInvocation` (`~/.gemini/config/hooks.json`, group `tmux-resurrect`) |
+| `sessions_save.sh` | resurrect post-save hook: snapshots the pane position → session ID map to `~/.local/share/tmux/<cli>_sessions.tsv`. | `@resurrect-hook-post-save-all` in `tmux.conf` |
+| `resume.sh` | resurrect restore command: relaunches the CLI resuming the pane's session (`claude --resume <id>` / `agy --conversation <id>`), or a fresh session if none was saved or it no longer exists. | `@resurrect-processes` in `tmux.conf` |
+
+`install.sh` registers the hooks (requires `jq`).
+
+`agents/antigravity/resume.sh [command [app_data_dir]]` also works for CLIs that share the Antigravity CLI's hooks and flags. Add them in the gitignored `tmux/local.conf`, matching how the process appears in `ps`:
+
+```tmux
+set -ga @resurrect-processes ' "~my-cli->~/.dotconfigs/tmux/agents/antigravity/resume.sh /path/to/my-cli ~/.gemini/my-cli"'
+```
+
+To check: `tmux list-panes -a -F '#{pane_id} #{@antigravity_session}'` should show an ID for each agent pane after its first prompt, and `prefix + C-s` should write it to `~/.local/share/tmux/antigravity_sessions.tsv`.
