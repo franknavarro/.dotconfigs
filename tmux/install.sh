@@ -18,6 +18,9 @@ chmod +x $DOTFILES/tmux/agent_hook.sh
 chmod +x $DOTFILES/tmux/claude_session_hook.sh
 chmod +x $DOTFILES/tmux/claude_sessions_save.sh
 chmod +x $DOTFILES/tmux/claude_resume.sh
+chmod +x $DOTFILES/tmux/antigravity_session_hook.sh
+chmod +x $DOTFILES/tmux/antigravity_sessions_save.sh
+chmod +x $DOTFILES/tmux/antigravity_resume.sh
 ln -s -f $DOTFILES/tmux/tmux.conf $HOME/.tmux.conf
 
 # Plugins (tmux-resurrect, tmux-continuum) via TPM; runs without a tmux server
@@ -38,5 +41,21 @@ else
 		jq --arg cmd "$CLAUDE_HOOK" '.hooks.SessionStart += [{"hooks": [{"type": "command", "command": $cmd}]}]' $CLAUDE_SETTINGS >$CLAUDE_SETTINGS.tmp &&
 			mv $CLAUDE_SETTINGS.tmp $CLAUDE_SETTINGS
 	fi
+fi
+
+# Antigravity CLI SessionStart/PreInvocation hooks that tag panes with their conversation
+# ID, so tmux-resurrect can resume each agy pane's own conversation after a reboot
+AGY_HOOKS=${AGY_HOOKS:-$HOME/.gemini/config/hooks.json}
+AGY_HOOK=$DOTFILES/tmux/antigravity_session_hook.sh
+if ! command -v jq >/dev/null; then
+	echo "jq not found: add $AGY_HOOK as a SessionStart and PreInvocation hook in $AGY_HOOKS manually"
+else
+	mkdir -p "$(dirname $AGY_HOOKS)"
+	[ -s $AGY_HOOKS ] || echo '{}' >$AGY_HOOKS
+	jq --arg cmd "$AGY_HOOK" '."tmux-resurrect" = {
+		"SessionStart": [{"type": "command", "command": $cmd, "timeout": 5}],
+		"PreInvocation": [{"type": "command", "command": $cmd, "timeout": 5}]
+	}' $AGY_HOOKS >$AGY_HOOKS.tmp &&
+		mv $AGY_HOOKS.tmp $AGY_HOOKS
 fi
 
