@@ -6,6 +6,7 @@
 
 bg_main="#44475a"
 right_sep=""
+right_sub_sep=""
 
 blocks=()
 
@@ -20,16 +21,19 @@ elif [[ -x "$HOME/.tmux_extension.sh" ]]; then
 fi
 
 if [[ -n "$ext_out" ]]; then
-  if [[ "$ext_out" =~ ^(#[0-9a-fA-F]{6}):(#[0-9a-fA-F]{6}):(.*)$ ]]; then
-    blocks+=("$ext_out")
-  else
-    blocks+=("#50fa7b:#000000:$ext_out")
-  fi
+  while IFS= read -r ext_line; do
+    [[ -z "$ext_line" ]] && continue
+    if [[ "$ext_line" =~ ^(#[0-9a-fA-F]{6}):(#[0-9a-fA-F]{6}):(.*)$ ]]; then
+      blocks+=("$ext_line")
+    else
+      blocks+=("#50fa7b:#000000:$ext_line")
+    fi
+  done <<< "$ext_out"
 fi
 
 # 2. Uptime (Dracula Cyan background)
 if command -v uptime >/dev/null 2>&1; then
-  up_str="$(uptime -p 2>/dev/null | sed -E 's/^up //; s/ weeks?/w/g; s/ days?/d/g; s/ hours?/h/g; s/ minutes?/m/g; s/,//g')"
+  up_str="$(uptime -p 2>/dev/null | sed -E 's/^up //; s/ weeks?/w/g; s/ days?/d/g; s/ hours?/h/g; s/ minutes?/m/g; s/,//g' | awk '{print $1 $2}')"
   [[ -n "$up_str" ]] && blocks+=("#8be9fd:#000000:⏱ $up_str")
 fi
 
@@ -67,7 +71,11 @@ prev_bg="$bg_main"
 
 for b in "${blocks[@]}"; do
   IFS=":" read -r bg fg text <<< "$b"
-  output+="#[fg=$bg,bg=$prev_bg]$right_sep#[fg=$fg,bg=$bg] $text "
+  if [[ "$bg" == "$prev_bg" ]]; then
+    output+="#[fg=$fg,bg=$bg]$right_sub_sep $text "
+  else
+    output+="#[fg=$bg,bg=$prev_bg]$right_sep#[fg=$fg,bg=$bg] $text "
+  fi
   prev_bg="$bg"
 done
 
