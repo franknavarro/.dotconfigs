@@ -38,8 +38,8 @@ A modular, cross-platform collection of dotfiles, shell configurations, and deve
   - **Line 0 (Top)**: Active and background Tmux sessions with powerline styling (`session_tabs.sh`).
   - **Line 1 (Bottom)**: Active session windows and pane tabs.
 - **Agent CLI Status & Notification System**:
-  - Real-time icon indicators positioned on the left side of session and window labels (`❓` interactive prompt > `🤖` turn finished > `🔔` bell > `❗` alert).
-  - Persistent prompt awareness: `❓` stays visible until user responds even when navigating between windows.
+  - Real-time colorized NerdFont indicators across session tabs, window tabs, and pane borders (`` interactive prompt > `` turn finished > `` thinking/running > `` bell > `` alert).
+  - Subagent-safe prompt & activity tracking: `` persists until answered without false-positive flickering on slow subagent tool calls, while `` indicates active agent or subagent execution.
   - See [Agent Integrations Guide](tmux/agents/AGENT_INTEGRATIONS.md) for full protocol and how to integrate any CLI agent.
 - **Session Persistence (tmux-resurrect + tmux-continuum)**:
   - Auto-saves every 15 minutes and restores on server start (`prefix + C-s` / `prefix + C-r` manually).

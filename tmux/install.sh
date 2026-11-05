@@ -47,19 +47,32 @@ else
 		mv $CLAUDE_SETTINGS.tmp $CLAUDE_SETTINGS
 fi
 
-# Antigravity CLI SessionStart/PreInvocation hooks that tag panes with their conversation
-# ID, so tmux-resurrect can resume each agy pane's own conversation after a reboot
+# Antigravity CLI lifecycle hooks for tmux status indicators and tmux-resurrect session tagging
 AGY_HOOKS=${AGY_HOOKS:-$HOME/.gemini/config/hooks.json}
 AGY_HOOK=$DOTFILES/tmux/agents/antigravity/session_hook.sh
+AGY_STATUS_HOOK='~/.dotconfigs/tmux/agents/agent_hook.sh'
 if ! command -v jq >/dev/null; then
-	echo "jq not found: add $AGY_HOOK as a SessionStart and PreInvocation hook in $AGY_HOOKS manually"
+	echo "jq not found: add $AGY_HOOK and $AGY_STATUS_HOOK hooks in $AGY_HOOKS manually"
 else
 	mkdir -p "$(dirname $AGY_HOOKS)"
 	[ -s $AGY_HOOKS ] || echo '{}' >$AGY_HOOKS
-	jq --arg cmd "$AGY_HOOK" '."tmux-resurrect" = {
-		"SessionStart": [{"type": "command", "command": $cmd, "timeout": 5}],
-		"PreInvocation": [{"type": "command", "command": $cmd, "timeout": 5}]
-	}' $AGY_HOOKS >$AGY_HOOKS.tmp &&
+	jq --arg cmd "$AGY_HOOK" --arg status_cmd "$AGY_STATUS_HOOK" '
+		."agent-tmux-status" = {
+			"SessionStart": [{"type": "command", "command": ($status_cmd + " session_start"), "timeout": 5}],
+			"PreInvocation": [{"type": "command", "command": ($status_cmd + " running"), "timeout": 5}],
+			"PreToolUse": [
+				{"matcher": ".*", "hooks": [{"type": "command", "command": ($status_cmd + " tool_pre"), "timeout": 5}]}
+			],
+			"PostToolUse": [
+				{"matcher": ".*", "hooks": [{"type": "command", "command": ($status_cmd + " tool_done"), "timeout": 5}]}
+			],
+			"Stop": [{"type": "command", "command": ($status_cmd + " done"), "timeout": 5}]
+		}
+		| ."tmux-resurrect" = {
+			"SessionStart": [{"type": "command", "command": $cmd, "timeout": 5}],
+			"PreInvocation": [{"type": "command", "command": $cmd, "timeout": 5}]
+		}
+	' $AGY_HOOKS >$AGY_HOOKS.tmp &&
 		mv $AGY_HOOKS.tmp $AGY_HOOKS
 fi
 
